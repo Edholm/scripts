@@ -25,12 +25,23 @@ def list_bikes(data, stations):
         name = bike['Name'].ljust(longest_name)
         avail_bikes = bike['AvailableBikes'] if 'AvailableBikes' in bike else 0
         avail_stands = bike['BikeStands'] - avail_bikes
-        ret.append("{3:>2} {0}  {1:>2} cycklar - {2:>2} platser".format(
+        ret.append("{1:02d}|{2:>2} - {0}".format(
             name,
             avail_bikes,
-            avail_stands,
-            bike['StationId']))
+            avail_stands))
     return "\n".join(ret)
+
+
+def pushover_notification(text, config):
+    data = {
+        'token': config['pushover_app'],
+        'user': config['pushover_user'],
+        'message': text,
+        'title': "Bike availability",
+    }
+    r = requests.post("https://api.pushover.net/1/messages.json", data=data)
+    print("Pushover response (" + str(r.status_code) + "): ")
+    print(r.text)
 
 
 def main():
@@ -41,8 +52,9 @@ def main():
         print("Failed to get bikes from API. Status code: " + req.status_code)
         return
     bikes = req.json()
-    # FIXME: pushover notification
-    print(list_bikes(bikes, config['wanted_stations']))
+    formatted = list_bikes(bikes, config['wanted_stations'])
+    print(formatted)
+    pushover_notification(formatted, config)
 
 
 if __name__ == '__main__':
