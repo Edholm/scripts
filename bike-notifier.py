@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # Send a pushover notification about Styr och Ställ bike availability
 import sys
+import math
 import requests
 import json
 from pathlib import Path
@@ -16,9 +17,29 @@ def read_config():
     return json.loads(conf_file.read_text())
 
 
-def list_bikes(data, stations):
+# Takes coordinates as (lat, long)
+# http://stackoverflow.com/a/27943
+def calc_dist(coord, my_coord):
+    lat1, lon1 = coord
+    lat2, lon2 = my_coord
+
+    R = 6371
+    dLat = math.radians(lat2 - lat1)
+    dLon = math.radians(lon2 - lon1)
+    a = math.sin(dLat / 2) * math.sin(dLat / 2) + \
+        math.cos(math.radians(lat1)) * \
+        math.radians(lat2) * math.sin(dLon / 2) * math.sin(dLon / 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    d = R * c
+    return d
+
+
+def list_bikes(data, stations, config):
     filtered = [x for x in data if x['StationId'] in stations]
-    # TODO: sort by distance to "me"
+    my_coord = (config['my_lat'], config['my_long'])
+    filtered = sorted(filtered, reverse=True,
+                      key=lambda x: calc_dist((x['Lat'], x['Long']),
+                                              my_coord))
 
     ret = []
     longest_name = max([len(x['Name']) for x in filtered])
@@ -53,7 +74,7 @@ def main():
         print("Failed to get bikes from API. Status code: " + req.status_code)
         return
     bikes = req.json()
-    formatted = list_bikes(bikes, config['wanted_stations'])
+    formatted = list_bikes(bikes, config['wanted_stations'], config)
     print(formatted)
     pushover_notification(formatted, config)
 
