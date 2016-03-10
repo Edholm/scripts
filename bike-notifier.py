@@ -7,8 +7,8 @@ from pathlib import Path
 
 
 def read_config():
-    script_name = Path(sys.argv[0]).stem
-    conf_file = Path(script_name + '.json')
+    script_path = Path(sys.argv[0])
+    conf_file = script_path.parent / Path(script_path.stem + '.json')
     if not conf_file.exists():
         print("Couldn't read config file " + str(conf_file))
         sys.exit(1)
@@ -18,6 +18,7 @@ def read_config():
 
 def list_bikes(data, stations):
     filtered = [x for x in data if x['StationId'] in stations]
+    # TODO: sort by distance to "me"
 
     ret = []
     longest_name = max([len(x['Name']) for x in filtered])
