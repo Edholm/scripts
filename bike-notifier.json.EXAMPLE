@@ -2,5 +2,7 @@
     "url": "http://data.goteborg.se/SelfServiceBicycleService/v1.0/Stations/<YOUR_APP_KEY>?&format=json",
     "wanted_stations": [<StationId1>, <StationId2>],
     "pushover_user": "<USER_KEY_GOES_HERE>",
-    "pushover_app": "<APP_KEY_GOES_HERE>"
+    "pushover_app": "<APP_KEY_GOES_HERE>",
+    "my_lat": 57.70887,
+    "my_long": 11.97456
 }

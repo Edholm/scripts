@@ -37,7 +37,7 @@ def calc_dist(coord, my_coord):
 def list_bikes(data, stations, config):
     filtered = [x for x in data if x['StationId'] in stations]
     my_coord = (config['my_lat'], config['my_long'])
-    filtered = sorted(filtered, reverse=True,
+    filtered = sorted(filtered,
                       key=lambda x: calc_dist((x['Lat'], x['Long']),
                                               my_coord))
 
